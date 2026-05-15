@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Patungan</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f3f4f6;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 500px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 25px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 14px;
+      }
+      input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+      .btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        margin-top: 15px;
+        transition: background 0.2s;
+      }
+      .btn-primary {
+        background-color: #2563eb;
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #1d4ed8;
+      }
+      .btn-outline {
+        background-color: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+      }
+      .btn-outline:hover {
+        background-color: #f3f4f6;
+      }
+      .btn-success {
+        background-color: #16a34a;
+        color: white;
+      }
+      .btn-success:hover {
+        background-color: #15803d;
+      }
+
+      .flex-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 12px;
+      }
+      .flex-1 {
+        flex: 1;
+      }
+
+      .step {
+        display: none;
+      }
+      .step.active {
+        display: block;
+      }
+
+      .summary-box {
+        background-color: #eff6ff;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+      .summary-box p {
+        margin: 5px 0;
+      }
+      .transaction-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .transaction-list li {
+        background: #f9fafb;
+        padding: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+      .amount {
+        color: #dc2626;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Kalkulator Patungan</h2>
+
+      <div id="step1" class="step active">
+        <label for="numPeople">Berapa orang yang ikut?</label>
+        <input type="number" id="numPeople" min="2" placeholder="Misal: 4" />
+        <button id="btnLanjut" class="btn btn-primary">Lanjut</button>
+      </div>
+
+      <div id="step2" class="step">
+        <p style="font-size: 14px; color: #4b5563; margin-bottom: 15px">
+          Masukkan nama dan total uang yang dikeluarkan tiap orang.
+        </p>
+        <div id="peopleContainer"></div>
+        <div class="flex-row" style="margin-top: 20px">
+          <button id="btnKembali" class="btn btn-outline" style="margin-top: 0">
+            Kembali
+          </button>
+          <button id="btnHitung" class="btn btn-primary" style="margin-top: 0">
+            Hitung Pembagian
+          </button>
+        </div>
+      </div>
+
+      <div id="step3" class="step">
+        <div id="summaryBox" class="summary-box"></div>
+        <h3 style="margin-bottom: 10px">Instruksi Transfer:</h3>
+        <ul id="transactionList" class="transaction-list"></ul>
+        <button id="btnUlang" class="btn btn-success">Hitung Ulang Baru</button>
+      </div>
+    </div>
+
+    <script>
+      const step1 = document.getElementById("step1");
+      const step2 = document.getElementById("step2");
+      const step3 = document.getElementById("step3");
+      const inputNumPeople = document.getElementById("numPeople");
+      const peopleContainer = document.getElementById("peopleContainer");
+      const summaryBox = document.getElementById("summaryBox");
+      const transactionList = document.getElementById("transactionList");
+
+      document.getElementById("btnLanjut").addEventListener("click", () => {
+        const num = parseInt(inputNumPeople.value);
+        if (num > 1) {
+          peopleContainer.innerHTML = "";
+          for (let i = 0; i < num; i++) {
+            peopleContainer.innerHTML += `
+                    <div class="flex-row person-row">
+                        <div class="flex-1">
+                            <input type="text" class="input-name" placeholder="Nama ${i + 1}">
+                        </div>
+                        <div class="flex-1">
+                            <input type="number" class="input-paid" placeholder="Nominal (Misal: 10000)">
+                        </div>
+                    </div>
+                `;
+          }
+          step1.classList.remove("active");
+          step2.classList.add("active");
+        } else {
+          alert("Jumlah orang harus lebih dari 1!");
+        }
+      });
+
+      document.getElementById("btnKembali").addEventListener("click", () => {
+        step2.classList.remove("active");
+        step1.classList.add("active");
+      });
+
+      document.getElementById("btnHitung").addEventListener("click", () => {
+        const rows = document.querySelectorAll(".person-row");
+        let people = [];
+        let isValid = true;
+
+        rows.forEach((row) => {
+          const name = row.querySelector(".input-name").value.trim();
+          const paid = row.querySelector(".input-paid").value;
+
+          if (name === "" || paid === "") {
+            isValid = false;
+          }
+          people.push({ name: name, paid: parseFloat(paid) });
+        });
+
+        if (!isValid) {
+          alert(
+            "Mohon isi semua Nama dan Nominal! (Isi 0 jika tidak mengeluarkan uang).",
+          );
+          return;
+        }
+
+        const totalExpense = people.reduce((sum, p) => sum + p.paid, 0);
+        const averageExpense = totalExpense / people.length;
+
+        let balances = people.map((p) => ({
+          name: p.name,
+          balance: p.paid - averageExpense,
+        }));
+
+        let debtors = balances
+          .filter((p) => p.balance < -0.01)
+          .map((p) => ({ ...p, balance: Math.abs(p.balance) }));
+        let creditors = balances.filter((p) => p.balance > 0.01);
+
+        let transactions = [];
+        let i = 0;
+        let j = 0;
+
+        while (i < debtors.length && j < creditors.length) {
+          let debtor = debtors[i];
+          let creditor = creditors[j];
+          let amount = Math.min(debtor.balance, creditor.balance);
+
+          transactions.push({
+            from: debtor.name,
+            to: creditor.name,
+            amount: amount,
+          });
+
+          debtor.balance -= amount;
+          creditor.balance -= amount;
+
+          if (debtor.balance < 0.01) i++;
+          if (creditor.balance < 0.01) j++;
+        }
+
+        summaryBox.innerHTML = `
+            <p>Total Pengeluaran: <strong>Rp ${totalExpense.toLocaleString("id-ID")}</strong></p>
+            <p>Tanggungan per Orang: <strong>Rp ${averageExpense.toLocaleString("id-ID", { maximumFractionDigits: 2 })}</strong></p>
+        `;
+
+        transactionList.innerHTML = "";
+        if (transactions.length === 0) {
+          transactionList.innerHTML =
+            '<li><span style="color: #16a34a; font-weight: bold;">Semua orang sudah impas, tidak ada yang perlu transfer!</span></li>';
+        } else {
+          transactions.forEach((t) => {
+            transactionList.innerHTML += `
+                    <li>
+                        <strong>${t.from}</strong> transfer ke <strong>${t.to}</strong> sebesar 
+                        <span class="amount">Rp ${t.amount.toLocaleString("id-ID", { maximumFractionDigits: 0 })}</span>
+                    </li>
+                `;
+          });
+        }
+
+        step2.classList.remove("active");
+        step3.classList.add("active");
+      });
+
+      document.getElementById("btnUlang").addEventListener("click", () => {
+        inputNumPeople.value = "";
+        step3.classList.remove("active");
+        step1.classList.add("active");
+      });
+    </script>
+  </body>
+</html>
